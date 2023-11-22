@@ -8,6 +8,10 @@
 #include "main.h"
 #include "INA219.h"
 
+uint16_t ina219_calibrationValue;
+int16_t ina219_currentDivider_mA;
+int16_t ina219_powerMultiplier_mW;
+
 uint16_t Read16(INA219_t *ina219, uint8_t Register)
 {
 	uint8_t Value[2];

@@ -21,8 +21,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "INA219.h"
+
 #include <stdio.h>
+#include "INA219.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -128,9 +130,9 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_ADC_Start_IT(&hadc1);
 
-  while(!INA219_Init(&ina219, &hi2c1, INA219_ADDRESS))
+  if(!INA219_Init(&ina219, &hi2c1, INA219_ADDRESS))
   {
-    printf("\r\nINA219 not found!\r\n");
+    printf("INA219 not found!\r\n");
     HAL_Delay(1000);
   }
 
@@ -147,13 +149,13 @@ int main(void)
     vshunt = (float)INA219_ReadShuntVolage_mV(&ina219);
     current = (float)INA219_ReadCurrent_mA(&ina219);
     power = (float)INA219_ReadPower_mW(&ina219);
-    printf("Temperature: %.2f C\n", mTemp);
-    printf("Bus Voltage: %.2f V\n", vbus);
-    printf("Shunt Voltage: %.2f mV\n", vshunt);
-    printf("Current: %.2f mA\n", current);
-    printf("Power: %.2f mW\n", power);
-	  HAL_GPIO_TogglePin(test_led_GPIO_Port, test_led_Pin);
-	  HAL_Delay(1000);
+    printf("Temperature: %.2f C\r\n", mTemp);
+    printf("Bus Voltage: %.2f V\r\n", vbus);
+    printf("Shunt Voltage: %.2f mV\r\n", vshunt);
+    printf("Current: %.2f mA\r\n", current);
+    printf("Power: %.2f mW\r\n", power);
+	HAL_GPIO_TogglePin(test_led_GPIO_Port, test_led_Pin);
+	HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }

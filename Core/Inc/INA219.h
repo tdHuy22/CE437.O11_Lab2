@@ -70,9 +70,9 @@ typedef struct
 	uint8_t				Address;
 } INA219_t;
 
-uint16_t ina219_calibrationValue;
-int16_t ina219_currentDivider_mA;
-int16_t ina219_powerMultiplier_mW;
+extern uint16_t ina219_calibrationValue;
+extern int16_t ina219_currentDivider_mA;
+extern int16_t ina219_powerMultiplier_mW;
 
 uint8_t INA219_Init(INA219_t *ina219, I2C_HandleTypeDef *i2c, uint8_t Address);
 uint16_t INA219_ReadBusVoltage_mV(INA219_t *ina219);
