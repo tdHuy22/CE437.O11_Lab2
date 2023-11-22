@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "INA219.h"
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,7 +45,16 @@ ADC_HandleTypeDef hadc1;
 
 I2C_HandleTypeDef hi2c1;
 
+UART_HandleTypeDef huart1;
+
 /* USER CODE BEGIN PV */
+
+float mTemp = 0.0f;
+float vADC = 0.0f;
+
+INA219_t ina219;
+
+float vbus = 0.0f, vshunt = 0.0f, current = 0.0f, power = 0.0f;
 
 /* USER CODE END PV */
 
@@ -53,12 +63,34 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
+
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+  return ch;
+}
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+  if (hadc->Instance == hadc1.Instance)
+  {
+    vADC = (float)HAL_ADC_GetValue(&hadc1) * 3.3f / 4096.0f;  
+    mTemp = vADC / 0.01f;
+  }  
+}
 
 /* USER CODE END 0 */
 
@@ -92,7 +124,15 @@ int main(void)
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_I2C1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  HAL_ADC_Start_IT(&hadc1);
+
+  while(!INA219_Init(&ina219, &hi2c1, INA219_ADDRESS))
+  {
+    printf("\r\nINA219 not found!\r\n");
+    HAL_Delay(1000);
+  }
 
   /* USER CODE END 2 */
 
@@ -103,6 +143,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    vbus = (float)INA219_ReadBusVoltage_V(&ina219);
+    vshunt = (float)INA219_ReadShuntVolage_mV(&ina219);
+    current = (float)INA219_ReadCurrent_mA(&ina219);
+    power = (float)INA219_ReadPower_mW(&ina219);
+    printf("Temperature: %.2f C\n", mTemp);
+    printf("Bus Voltage: %.2f V\n", vbus);
+    printf("Shunt Voltage: %.2f mV\n", vshunt);
+    printf("Current: %.2f mA\n", current);
+    printf("Power: %.2f mW\n", power);
+	  HAL_GPIO_TogglePin(test_led_GPIO_Port, test_led_Pin);
+	  HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -231,6 +282,39 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
 
 }
 
