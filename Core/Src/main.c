@@ -130,7 +130,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_ADC_Start_IT(&hadc1);
 
-  if(!INA219_Init(&ina219, &hi2c1, INA219_ADDRESS))
+  while(!INA219_Init(&ina219, &hi2c1, INA219_ADDRESS))
   {
     printf("INA219 not found!\r\n");
     HAL_Delay(1000);
@@ -240,7 +240,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
